@@ -150,5 +150,5 @@ Usage: <class_name>.update(<_id>, <dictionary>)
 <br>
 
 ## Authors :black_nib:
-- [Pierrette UMUTONIWASE](https://github.com/)
+- [Pierrette UMUTONIWASE](https://github.com/Umutoniwasepie)
 - [Ineza Winny Didine](https://github.com/winnyineza/)
