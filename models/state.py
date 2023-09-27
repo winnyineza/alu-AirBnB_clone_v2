@@ -15,9 +15,6 @@ class State(BaseModel, Base):
     # Define the one-to-many relationship with City
     cities = relationship("City", cascade='all, delete-orphan', backref="state")
 
-    # No need for a separate cities property, as SQLAlchemy handles this relationship
-    
     def __init__(self, *args, **kwargs):
         """Initialize a new State"""
         super().__init__(*args, **kwargs)
-
