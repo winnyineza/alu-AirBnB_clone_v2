@@ -14,7 +14,7 @@ class City(BaseModel, Base):
     name = Column(String(128), nullable=False)
     state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
     
-    # Define the relationship with State
+    # Define the many-to-one relationship with State
     state = relationship("State", back_populates="cities")
     
     # Define the one-to-many relationship with Place
