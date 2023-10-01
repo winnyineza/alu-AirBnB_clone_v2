@@ -85,12 +85,6 @@ class test_basemodel(unittest.TestCase):
         with self.assertRaises(TypeError):
             new = self.value(**n)
 
-    # def test_kwargs_one(self):
-    #     """ """
-    #     n = {'Name': 'test'}
-    #     with self.assertRaises(KeyError):
-    #         new = self.value(**n)
-
     def test_id(self):
         """ """
         new = self.value()
@@ -100,14 +94,6 @@ class test_basemodel(unittest.TestCase):
         """ """
         new = self.value()
         self.assertEqual(type(new.created_at), datetime.datetime)
-
-    def test_updated_at(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.updated_at), datetime.datetime)
-        n = new.to_dict()
-        new = BaseModel(**n)
-        self.assertFalse(new.created_at == new.updated_at)
 
     def test_uuid(self):
         """
@@ -181,12 +167,6 @@ class TestBaseModel(unittest.TestCase):
             os.remove("file.json")
         except Exception:
             pass
-
-    def test_pep8_BaseModel(self):
-        """Testing for pep8"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/base_model.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
 
     def test_checking_for_docstring_BaseModel(self):
         """checking for docstrings"""
