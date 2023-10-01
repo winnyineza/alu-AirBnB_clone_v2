@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+"""create a unique FileStorage instance"""
 from os import getenv
 
 storage_type = getenv('HBNB_TYPE_STORAGE')
