@@ -21,9 +21,6 @@ class TestHBNBCommand(unittest.TestCase):
     """
     @unittest.skipIf(
         os.getenv('HBNB_TYPE_STORAGE') == 'db', 'FileStorage test')
-    def test_something():
-    result = clear_stream()
-    assert result == expected_value
         def test_fs_create(self):
         """Tests the create command with the file storage.
         """
