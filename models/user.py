@@ -1,19 +1,31 @@
 #!/usr/bin/python3
 """This is the user class"""
-from sqlalchemy import Column, String
+from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import BaseModel, Base
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from models.place import Place
+from models.review import Review
 
 
 class User(BaseModel, Base):
-    """This is the class for User
+    """Represents a user for a MySQL database.
+
+    Inherits from SQLAlchemy Base and links to the MySQL table users.
+
     Attributes:
-        email: input email
-        password: input password
-        first_name: input first name
-        last_name: input last name
+        __tablename__ (str): The name of the MySQL table to store users.
+        email: (sqlalchemy String): The user's email address.
+        password (sqlalchemy String): The user's password.
+        first_name (sqlalchemy String): The user's first name.
+        last_name (sqlalchemy String): The user's last name.
+        places (sqlalchemy relationship): The User-Place relationship.
+        reviews (sqlalchemy relationship): The User-Review relationship.
     """
     __tablename__ = "users"
     email = Column(String(128), nullable=False)
     password = Column(String(128), nullable=False)
     first_name = Column(String(128))
     last_name = Column(String(128))
+    places = relationship("Place", backref="user", cascade="delete")
+    reviews = relationship("Review", backref="user", cascade="delete")

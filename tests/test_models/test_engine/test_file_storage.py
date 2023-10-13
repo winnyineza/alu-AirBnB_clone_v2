@@ -1,109 +1,103 @@
 #!/usr/bin/python3
-""" Module for testing file storage"""
 import unittest
-from models.base_model import BaseModel
-from models import storage
+import models
+from models.user import User
+from models.review import Review
+from models.amenity import Amenity
+from models.state import State
+from models.place import Place
+from models.city import City
 import os
 
 
-class test_fileStorage(unittest.TestCase):
-    """ Class to test the file storage method """
+# skip these test if the storage is not db
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', "skip if not fs")
+class TestDBStorage(unittest.TestCase):
+    """DB Storage test"""
 
     def setUp(self):
         """ Set up test environment """
-        del_list = []
-        for key in storage._FileStorage__objects.keys():
-            del_list.append(key)
-        for key in del_list:
-            del storage._FileStorage__objects[key]
+        self.storage = models.storage
 
     def tearDown(self):
         """ Remove storage file at end of tests """
-        try:
-            os.remove('file.json')
-        except:
-            pass
+        del self.storage
 
-    def test_obj_list_empty(self):
-        """ __objects is initially empty """
-        self.assertEqual(len(storage.all()), 0)
+    def test_user(self):
+        """ Tests user """
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
+        self.assertFalse(user.id in self.storage.all())
+        self.assertEqual(user.name, "Chyna")
 
-    def test_new(self):
-        """ New object is correctly added to __objects """
-        new = BaseModel()
-        for obj in storage.all().values():
-            temp = obj
-        self.assertTrue(temp is obj)
+    def test_city(self):
+        """ test city """
+        state = State(name="California")
+        state.save()
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
+        self.assertFalse(city.id in self.storage.all())
+        self.assertEqual(city.name, "Batch")
 
-    def test_all(self):
-        """ __objects is properly returned """
-        new = BaseModel()
-        temp = storage.all()
-        self.assertIsInstance(temp, dict)
+    def test_state(self):
+        """ test state"""
+        state = State(name="California")
+        state.save()
+        self.assertFalse(state.id in self.storage.all())
+        self.assertEqual(state.name, "California")
 
-    def test_base_model_instantiation(self):
-        """ File is not created on BaseModel save """
-        new = BaseModel()
-        self.assertFalse(os.path.exists('file.json'))
+    def test_place(self):
+        """Test place"""
+        state = State(name="California")
+        state.save()
 
-    def test_empty(self):
-        """ Data is saved to file """
-        new = BaseModel()
-        thing = new.to_dict()
-        new.save()
-        new2 = BaseModel(**thing)
-        self.assertNotEqual(os.path.getsize('file.json'), 0)
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
 
-    def test_save(self):
-        """ FileStorage save method """
-        new = BaseModel()
-        storage.save()
-        self.assertTrue(os.path.exists('file.json'))
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
 
-    def test_reload(self):
-        """ Storage file is successfully loaded to __objects """
-        new = BaseModel()
-        storage.save()
-        storage.reload()
-        for obj in storage.all().values():
-            loaded = obj
-        self.assertEqual(new.to_dict()['id'], loaded.to_dict()['id'])
+        place = Place(name="Palace", number_rooms=4)
+        place.city_id = city.id
+        place.user_id = user.id
+        place.save()
 
-    def test_reload_empty(self):
-        """ Load from an empty file """
-        with open('file.json', 'w') as f:
-            pass
-        with self.assertRaises(ValueError):
-            storage.reload()
+        self.assertFalse(place.id in self.storage.all())
+        self.assertEqual(place.number_rooms, 4)
+        self.assertEqual(place.name, "Palace")
 
-    def test_reload_from_nonexistent(self):
-        """ Nothing happens if file does not exist """
-        self.assertEqual(storage.reload(), None)
+    def test_amenity(self):
+        """ test amenity """
+        amenity = Amenity(name="Startlink")
+        amenity.save()
+        self.assertFalse(amenity.id in self.storage.all())
+        self.assertTrue(amenity.name, "Startlink")
 
-    def test_base_model_save(self):
-        """ BaseModel save method calls storage save """
-        new = BaseModel()
-        new.save()
-        self.assertTrue(os.path.exists('file.json'))
+    def test_review(self):
+        """ test review """
+        state = State(name="California")
+        state.save()
 
-    def test_type_path(self):
-        """ Confirm __file_path is string """
-        self.assertEqual(type(storage._FileStorage__file_path), str)
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
 
-    def test_type_objects(self):
-        """ Confirm __objects is a dict """
-        self.assertEqual(type(storage.all()), dict)
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
 
-    def test_key_format(self):
-        """ Key is properly formatted """
-        new = BaseModel()
-        _id = new.to_dict()['id']
-        for key in storage.all().keys():
-            temp = key
-        self.assertEqual(temp, 'BaseModel' + '.' + _id)
+        place = Place(name="Palace", number_rooms=4)
+        place.city_id = city.id
+        place.user_id = user.id
+        place.save()
 
-    def test_storage_var_created(self):
-        """ FileStorage object storage created """
-        from models.engine.file_storage import FileStorage
-        print(type(storage))
-        self.assertEqual(type(storage), FileStorage)
+        review = Review(text="no comment", place_id=place.id, user_id=user.id)
+        review.save()
+
+        self.assertFalse(review.id in self.storage.all())
+        self.assertEqual(review.text, "no comment")
+
+
+if __name__ == '__main__':
+    unittest.main()
