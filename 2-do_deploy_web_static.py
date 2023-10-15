@@ -1,31 +1,41 @@
 #!/usr/bin/python3
-""" This is a fabfile script pushes the webstatic archive to the webserver
-    and decompresses it.
 """
-
-from fabric.api import *
-
-env.user = 'ubuntu'
+script that distributes an archive to my web servers,
+using the function (do_deploy:)
+"""
+import os
+from fabric.api import put, run, env
 env.hosts = ['54.227.96.198', '54.158.34.169']
 
 
 def do_deploy(archive_path):
-    """ This function uploads the archive file and decompresses it to right
-     folders in the server."""
-    fil = archive_path[8:]
-    filename = archive_path[8:-4]
-    upload = put(archive_path, "/tmp/")
-    if upload.failed:
+    """
+    Distribution to my servers
+    """
+    if archive_path is None or not os.path.exists(archive_path):
         return False
-    run("mkdir -p /data/web_static/releases/{}/".format(filename))
-    run("tar -xzf /tmp/{} -C /data/web_static/releases/{}/".format(
-        fil, filename))
-    run("mv /data/web_static/releases/{0}/web_static/* /data/\
-web_static/releases/{0}/".format(filename))
-    run("rm -rf /data/web_static/releases/{}/web_static".format(filename))
-    run("rm /tmp/{}".format(fil))
-    run("rm -rf /data/web_static/current")
-    run("ln -s /data/web_static/releases/{}/ /data/web_static/current".format(
-        filename))
-    print("New version deployed!")
-    return True
+    try:
+        file = archive_path.split("/")[-1]
+        file_name = file.split(".")[0]
+        path = "/data/web_static/releases/"
+        # upload the archive to the /tmp/ directory of the web server
+        put(archive_path, "/tmp/")
+        # create a folder with the same name as the archive
+        # without the extension
+        run("mkdir -p {}{}/".format(path, file_name))
+        # uncompress the archive to the folder
+        run("tar -xzf /tmp/{} -C {}{}/".format(
+            file, path, file_name))
+        # delete the archive from the web server
+        run("rm /tmp/{}".format(file))
+        run("mv {0}{1}/web_static/* {0}{1}/".format(path, file_name))
+        # delete the symbolic link /data/web_static/current from the web server
+        run("rm -rf {}{}/web_static".format(path, file_name))
+        run("rm -rf /data/web_static/current")
+        # create new symbolic link /data/web_static/current on web server
+        # linked to the new version of your code
+        run("ln -s {}{}/ /data/web_static/current".
+            format(path, file_name))
+        return True
+    except BaseException:
+        return False
