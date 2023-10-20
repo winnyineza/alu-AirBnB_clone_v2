@@ -1,20 +1,37 @@
 #!/usr/bin/python3
-"""This is the state class"""
+""" Stating Module for HBNB project """
+import os
+
+from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from models.base_model import BaseModel, Base
+from models.city import City
+import models
 
 
 class State(BaseModel, Base):
-    """This is the class for State
-    Attributes
-    """
-    __tablename__ = "states"
+    """ State class """
+    __tablename__ = 'states'
+
     name = Column(String(128), nullable=False)
 
-    cities = relationship("City", cascade='all, delete-orphan',
-                          backref="state")
+    if os.getenv("HBNB_TYPE_STORAGE") == "db":
+        cities = relationship('City', backref='state',
+                              cascade='all, delete-orphan')
 
-    def __init__(self, *args, **kwargs):
-        """Initialize a new State"""
-        super().__init__(*args, **kwargs)
+    else:
+        # if os.getenv("HBNB_TYPE_STORAGE") != "db":
+        # @property
+        # def cities(self):
+        #     """ Returns the list of City instances with state_id
+        #     equals to the current State.id. """
+        #     all_cities = list(models.storage.all(City).values())
+        #     return list(filter(lambda city: (city.id == self.id),
+        #     all_cities))
+        # no time to fix
+        @property
+        def cities(self):
+            """ Returns the list of City instances with state_id
+            equals to the current State.id. """
+            return [city for city in models.storage.all(City).values()
+                    if city.state_id == self.id]
